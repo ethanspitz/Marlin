@@ -27,8 +27,11 @@
 #include "../gcode.h"
 #include "../../Marlin.h" // for fan_speed — should move those to Planner
 
-#if ENABLED(SINGLENOZZLE)
+#if EXTRUDERS > 1
   #include "../../module/motion.h"
+#endif
+
+#if ENABLED(SINGLENOZZLE)
   #include "../../module/tool_change.h"
 #endif
 
