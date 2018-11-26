@@ -46,15 +46,17 @@
  *           3-255 = Set the speed for use with T2
  */
 void GcodeSuite::M106() {
-  const uint8_t p = parser.byteval('P');
+  if( parser.seenval('P') ) {
+    const uint8_t p = parser.byteval('P');
+  }
+  else {
+    #if EXTRUDERS > 1 
+      const uint8_t p = active_extruder;
+    #else
+      const uint8_t p = 0;
+    #endif
+  }
   const uint16_t s = parser.ushortval('S', 255);
-
-  #if ENABLED(SINGLENOZZLE)
-    if (p != active_extruder) {
-      if (p < EXTRUDERS) singlenozzle_fan_speed[p] = MIN(s, 255U);
-      return;
-    }
-  #endif
 
   if (p < FAN_COUNT) {
     #if ENABLED(EXTRA_FAN_SPEED)
@@ -75,7 +77,15 @@ void GcodeSuite::M106() {
         return;
       }
     #endif // EXTRA_FAN_SPEED
-    fan_speed[p] = MIN(s, 255U);
+
+  #if ENABLED(SINGLENOZZLE)
+    if (p != active_extruder) {
+      if (p < EXTRUDERS) singlenozzle_fan_speed[p] = MIN(s, 255U);
+      return;
+    }
+  #endif
+  
+  fan_speed[p] = MIN(s, 255U);
   }
 }
 
