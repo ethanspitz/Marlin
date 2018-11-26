@@ -82,6 +82,7 @@ void GcodeSuite::M106() {
       if (p < EXTRUDERS) singlenozzle_fan_speed[p] = MIN(s, 255U);
       return;
     }
+    p = 0; // For single nozzle, always set the output to 0 as its the only physical fan in use
   #endif
 
   fan_speed[p] = MIN(s, 255U);
