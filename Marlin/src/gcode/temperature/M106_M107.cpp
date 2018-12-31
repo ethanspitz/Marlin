@@ -60,7 +60,13 @@ void GcodeSuite::M106() {
 
   const uint16_t s = parser.ushortval('S', 255);
 
-  if (p < FAN_COUNT) {
+  #if ENABLED(SINGLENOZZLE)
+    const bool fan_valid = (p < EXTRUDERS)
+  #else
+    const bool fan_valid = (p < FAN_COUNT);
+  #endif
+
+  if (fan_valid) {
     #if ENABLED(EXTRA_FAN_SPEED)
       const int16_t t = parser.intval('T');
       if (t > 0) {
@@ -104,7 +110,12 @@ void GcodeSuite::M107() {
     }
   #endif
 
-  if (p < FAN_COUNT) fan_speed[p] = 0;
+  #if ENABLED(SINGLENOZZLE)
+    const bool fan_valid = (p < EXTRUDERS)
+  #else
+    const bool fan_valid = (p < FAN_COUNT);
+  #endif
+  if (fan_valid) fan_speed[p] = 0;
 }
 
 #endif // FAN_COUNT > 0
