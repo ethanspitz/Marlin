@@ -61,7 +61,7 @@ void GcodeSuite::M106() {
   const uint16_t s = parser.ushortval('S', 255);
 
   #if ENABLED(SINGLENOZZLE)
-    const bool fan_valid = (p < EXTRUDERS)
+    const bool fan_valid = (p < EXTRUDERS);
   #else
     const bool fan_valid = (p < FAN_COUNT);
   #endif
@@ -111,7 +111,7 @@ void GcodeSuite::M107() {
   #endif
 
   #if ENABLED(SINGLENOZZLE)
-    const bool fan_valid = (p < EXTRUDERS)
+    const bool fan_valid = (p < EXTRUDERS);
   #else
     const bool fan_valid = (p < FAN_COUNT);
   #endif
