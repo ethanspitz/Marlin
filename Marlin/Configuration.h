@@ -911,13 +911,13 @@
 #endif
 
 #if (ENABLED(MachineCR10Std))
-#define DEFAULT_MAX_FEEDRATE          { 500, 500, 10, 25 }
-#define DEFAULT_MAX_ACCELERATION      { 1500, 1500, 100, 25 }
+#define DEFAULT_MAX_FEEDRATE          { 300, 300, 5, 25 }
+#define DEFAULT_MAX_ACCELERATION      { 500, 500, 100, 25 }
 #define DEFAULT_ACCELERATION          300    // X, Y, Z and E acceleration for printing moves
 #define DEFAULT_RETRACT_ACCELERATION  1000    // E acceleration for retracts
 #define DEFAULT_TRAVEL_ACCELERATION   300    // X, Y, Z acceleration for travel (non printing) moves
-#define DEFAULT_XJERK                 20.0
-#define DEFAULT_YJERK                 20.0
+#define DEFAULT_XJERK                 10.0
+#define DEFAULT_YJERK                 10.0
 #define DEFAULT_ZJERK                  0.4
 #define DEFAULT_EJERK                  5.0
 #endif
