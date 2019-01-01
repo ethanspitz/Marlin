@@ -48,7 +48,7 @@
    Enable this if you have an all metal hotend capable of 300c
 
 */
-#define HotendAllMetal
+//#define HotendAllMetal
 
 /*
  * Select these if you have changed to a high performance extruder
@@ -62,7 +62,7 @@
   * If any dual extruder is used, define type here
   */
 
-  #define Dual_BowdenSplitterY
+  //#define Dual_BowdenSplitterY
   //#define Dual_CyclopsSingleNozzle
   //#define Dual_ChimeraDualNozzle
 
@@ -86,7 +86,7 @@
 */
 //#define ABL_EZABL // TH3D EZABL or Any NO Sensor
 //#define ABL_NCSW //Creality ABL or Any NC Sensor
-#define ABL_BLTOUCH
+//#define ABL_BLTOUCH
 
 /*
    Choose bed leveling type here
@@ -765,7 +765,7 @@
 // or to allow moving the extruder regardless of the hotend temperature.
 // *** IT IS HIGHLY RECOMMENDED TO LEAVE THIS OPTION ENABLED! ***
 #define PREVENT_COLD_EXTRUSION
-#define EXTRUDE_MINTEMP 160
+#define EXTRUDE_MINTEMP 180
 
 // This option prevents a single extrusion longer than EXTRUDE_MAXLENGTH.
 // Note that for Bowden Extruders a too-small value here may prevent loading.
@@ -1900,8 +1900,8 @@ GRID_MAX_POINTS_X 3
 // @section temperature
 
 // Preheat Constants
-#define PREHEAT_1_TEMP_HOTEND 180
-#define PREHEAT_1_TEMP_BED     70
+#define PREHEAT_1_TEMP_HOTEND 210
+#define PREHEAT_1_TEMP_BED     60
 #define PREHEAT_1_FAN_SPEED     0 // Value from 0 to 255
 
 #define PREHEAT_2_TEMP_HOTEND 240
