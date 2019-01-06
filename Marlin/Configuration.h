@@ -1,4 +1,4 @@
-
+#include "macros.h"
 /*
    Base machine
    Choose one option below to define machine size, board, and parameters
@@ -42,6 +42,7 @@
    Configured with 5015 left wing, right wing ABL sensor (BLTouch or M18) only
 */
 #define HotendStock
+//#define HotendMicroSwissCR10SPro
 //#define HotendE3D
 
 /*
@@ -314,6 +315,8 @@
 #define VerChar2 "S"
 #elif(ENABLED(HotendE3D))
 #define VerChar2 "E"
+#elif(ENABLED(HotendMicroSwissCR10SPro))
+#define VerChar2 "E"
 #endif
 
 #if(ENABLED(HotendAllMetal))
@@ -566,7 +569,7 @@
    :{ '0': "Not used", '1':"100k / 4.7k - EPCOS", '2':"200k / 4.7k - ATC Semitec 204GT-2", '3':"Mendel-parts / 4.7k", '4':"10k !! do not use for a hotend. Bad resolution at high temp. !!", '5':"100K / 4.7k - ATC Semitec 104GT-2 (Used in ParCan & J-Head)", '6':"100k / 4.7k EPCOS - Not as accurate as Table 1", '7':"100k / 4.7k Honeywell 135-104LAG-J01", '8':"100k / 4.7k 0603 SMD Vishay NTCS0603E3104FXT", '9':"100k / 4.7k GE Sensing AL03006-58.2K-97-G1", '10':"100k / 4.7k RS 198-961", '11':"100k / 4.7k beta 3950 1%", '12':"100k / 4.7k 0603 SMD Vishay NTCS0603E3104FXT (calibrated for Makibox hot bed)", '13':"100k Hisens 3950  1% up to 300°C for hotend 'Simple ONE ' & hotend 'All In ONE'", '20':"PT100 (Ultimainboard V2.x)", '51':"100k / 1k - EPCOS", '52':"200k / 1k - ATC Semitec 204GT-2", '55':"100k / 1k - ATC Semitec 104GT-2 (Used in ParCan & J-Head)", '60':"100k Maker's Tool Works Kapton Bed Thermistor beta=3950", '66':"Dyze Design 4.7M High Temperature thermistor", '70':"the 100K thermistor found in the bq Hephestos 2", '71':"100k / 4.7k Honeywell 135-104LAF-J01", '147':"Pt100 / 4.7k", '1047':"Pt1000 / 4.7k", '110':"Pt100 / 1k (non-standard)", '1010':"Pt1000 / 1k (non standard)", '-3':"Thermocouple + MAX31855 (only for sensor 0)", '-2':"Thermocouple + MAX6675 (only for sensor 0)", '-1':"Thermocouple + AD595",'998':"Dummy 1", '999':"Dummy 2" }
 */
 
-#if ENABLED(HotendStock)
+#if ENABLED(HotendStock) || ENABLED(HotendMicroSwissCR10SPro)
 #define TEMP_SENSOR_0 1
   #if(ENABLED(Dual_ChimeraDualNozzle))
     #define TEMP_SENSOR_1 1
@@ -680,9 +683,11 @@
       #define  DEFAULT_Ki 1.27
       #define  DEFAULT_Kd 59.93
     #endif
-#endif
-
-#if ENABLED(HotendE3D)
+#elif (ENABLED(HotendMicroSwissCR10SPro))
+    #define  DEFAULT_Kp 32.49
+    #define  DEFAULT_Ki 3.64
+    #define  DEFAULT_Kd 72.54
+#elif ENABLED(HotendE3D)
 //E3D v6 Clone with 5050 fan wing at 100% set to 235
 #define  DEFAULT_Kp 23.36
 #define  DEFAULT_Ki 1.99
@@ -911,13 +916,13 @@
 #endif
 
 #if (ENABLED(MachineCR10Std))
-#define DEFAULT_MAX_FEEDRATE          { 300, 300, 5, 25 }
-#define DEFAULT_MAX_ACCELERATION      { 500, 500, 100, 25 }
+#define DEFAULT_MAX_FEEDRATE          { 750, 750, 10, 25 }
+#define DEFAULT_MAX_ACCELERATION      { 2000, 2000, 100, 25 }
 #define DEFAULT_ACCELERATION          300    // X, Y, Z and E acceleration for printing moves
-#define DEFAULT_RETRACT_ACCELERATION  1000    // E acceleration for retracts
+#define DEFAULT_RETRACT_ACCELERATION  7000    // E acceleration for retracts
 #define DEFAULT_TRAVEL_ACCELERATION   300    // X, Y, Z acceleration for travel (non printing) moves
-#define DEFAULT_XJERK                 10.0
-#define DEFAULT_YJERK                 10.0
+#define DEFAULT_XJERK                 20.0
+#define DEFAULT_YJERK                 20.0
 #define DEFAULT_ZJERK                  0.4
 #define DEFAULT_EJERK                  5.0
 #endif
@@ -1114,7 +1119,7 @@
     #define Y_PROBE_OFFSET_FROM_EXTRUDER -10  // Y offset: -front +behind [the nozzle]
     #define Z_PROBE_OFFSET_FROM_EXTRUDER 0   // Z offset: -below +above  [the nozzle]
   #endif
-#elif ENABLED(MachineCR10SPro) && ENABLED(HotendStock)
+#elif ENABLED(MachineCR10SPro) && (ENABLED(HotendStock) || ENABLED(HotendMicroSwissCR10SPro))
   #if ENABLED(ABL_BLTOUCH)
     #define X_PROBE_OFFSET_FROM_EXTRUDER -41  // X offset: -left  +right  [of the nozzle]
     #define Y_PROBE_OFFSET_FROM_EXTRUDER -8  // Y offset: -front +behind [the nozzle]
