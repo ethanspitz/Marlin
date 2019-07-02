@@ -22,17 +22,25 @@
 //#define MachineMini
 //#define MachineCR20 //Buzzer doesnt work, need to map pin
 //#define MachineCR10Std
-#define MachineCR10SPro // Has not seen real hardware yet!
+#define MachineCR10SPro
 //#define MachineCRX
 //#define MachineS4
 //#define MachineS5
 
 
-#define BoardRev2 //Enable for SD detect function on Rev 2.1 boards or Ender 4
+//#define BoardRev2 //Enable for SD detect function on Rev 2.1 boards or Ender 4
 //#define GraphicLCD //Full graphics LCD for Ender 4
-#define AddonFilSensor //Adds a filamnt runout sensor to the CR20 or Ender 4
-#define lerdgeFilSensor //Using lerdge filament sensor, which is opposite polarity to stock
+//#define ForceCRXDisplay
+//#define Force10SProDisplay
+#define TM3DTouchscreenUpdates // Enables TM3D Error screens and eeprom screen not found in Creality screen firmware
+//#define AddonFilSensor //Adds a filamnt runout sensor to the CR20 or Ender 4
+//#define lerdgeFilSensor //Using lerdge filament sensor, which is opposite polarity to stock
 //#define DualFilSensors //Using dual filament sensors on XMax and YMAX
+
+// Use Adaptive step smoothing, Junction Deviation and S Curve Acceleration
+// Slower but smoother more accurate moves
+//#define SmoothMotion
+
 /*
    Hotend Type
    Choose one option below.
@@ -41,8 +49,8 @@
 
    Configured with 5015 left wing, right wing ABL sensor (BLTouch or M18) only
 */
-#define HotendStock
-//#define HotendMicroSwissCR10SPro
+//#define HotendStock
+#define HotendMicroSwissCR10SPro
 //#define HotendE3D
 
 /*
@@ -169,6 +177,8 @@
 #if(ENABLED(MachineCR10SPro))
   #if DISABLED(GraphicLCD)
     #define CREALITY_DWIN
+     #define FIL_RUNOUT_PIN 2
+     #define FIL_RUNOUT_INVERTING false
   #endif
   #define MachineCR10Std
   #if DISABLED(ABL_BLTOUCH)
@@ -179,13 +189,15 @@
   #endif
   #define MeshStd
   #define BoardRev2
-  #define SD_DETECT_PIN     49
+  #define SD_DETECT_PIN 49
 #endif
 
 
 #if(ENABLED(MachineCRX))
   #if DISABLED(GraphicLCD)
     #define CREALITY_DWIN
+    #define FIL_RUNOUT_PIN 2
+    #define FIL_RUNOUT_INVERTING false
   #endif
   #define MachineCR10Std
   #define Dual_BowdenSplitterY
@@ -904,8 +916,8 @@
                                         X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
 */
 #if (ENABLED(MachineMini) || ENABLED(MachineCR20) || ENABLED(MachineEnder2) || ENABLED(MachineEnder3) || ENABLED(MachineEnder4))
-#define DEFAULT_MAX_FEEDRATE          { 750, 750, 10, 25 }
-#define DEFAULT_MAX_ACCELERATION      { 2000, 2000, 100, 25 }
+#define DEFAULT_MAX_FEEDRATE          { 750, 750, 10, 50 }
+#define DEFAULT_MAX_ACCELERATION      { 2000, 2000, 100, 500 }
 #define DEFAULT_ACCELERATION          300    // X, Y, Z and E acceleration for printing moves
 #define DEFAULT_RETRACT_ACCELERATION  1000    // E acceleration for retracts
 #define DEFAULT_TRAVEL_ACCELERATION   300    // X, Y, Z acceleration for travel (non printing) moves
@@ -913,11 +925,19 @@
 #define DEFAULT_YJERK                 20.0
 #define DEFAULT_ZJERK                  0.4
 #define DEFAULT_EJERK                  5.0
-#endif
-
-#if (ENABLED(MachineCR10Std))
-#define DEFAULT_MAX_FEEDRATE          { 750, 750, 10, 25 }
-#define DEFAULT_MAX_ACCELERATION      { 2000, 2000, 100, 25 }
+#elif (ENABLED(MachineCR10SPro))
+#define DEFAULT_MAX_FEEDRATE          { 500, 500, 10, 70 }
+#define DEFAULT_MAX_ACCELERATION      { 750, 750, 100, 1000 }
+#define DEFAULT_ACCELERATION          300    // X, Y, Z and E acceleration for printing moves
+#define DEFAULT_RETRACT_ACCELERATION  1000    // E acceleration for retracts
+#define DEFAULT_TRAVEL_ACCELERATION   300    // X, Y, Z acceleration for travel (non printing) moves
+#define DEFAULT_XJERK                 8.0
+#define DEFAULT_YJERK                 8.0
+#define DEFAULT_ZJERK                 0.4
+#define DEFAULT_EJERK                 5.0
+#elif (ENABLED(MachineCR10Std))
+#define DEFAULT_MAX_FEEDRATE          { 500, 500, 10, 50 }
+#define DEFAULT_MAX_ACCELERATION      { 1500, 1500, 100, 500 }
 #define DEFAULT_ACCELERATION          300    // X, Y, Z and E acceleration for printing moves
 #define DEFAULT_RETRACT_ACCELERATION  7000    // E acceleration for retracts
 #define DEFAULT_TRAVEL_ACCELERATION   300    // X, Y, Z acceleration for travel (non printing) moves
@@ -925,11 +945,9 @@
 #define DEFAULT_YJERK                 20.0
 #define DEFAULT_ZJERK                  0.4
 #define DEFAULT_EJERK                  5.0
-#endif
-
-#if ENABLED( MachineS4)
-#define DEFAULT_MAX_FEEDRATE          { 500, 400, 10, 25 }
-#define DEFAULT_MAX_ACCELERATION      { 1000, 750, 100, 25 }
+#elif ENABLED( MachineS4)
+#define DEFAULT_MAX_FEEDRATE          { 500, 400, 10, 50 }
+#define DEFAULT_MAX_ACCELERATION      { 1000, 750, 100, 500 }
 #define DEFAULT_ACCELERATION          300    // X, Y, Z and E acceleration for printing moves
 #define DEFAULT_RETRACT_ACCELERATION  1000    // E acceleration for retracts
 #define DEFAULT_TRAVEL_ACCELERATION   300    // X, Y, Z acceleration for travel (non printing) moves
@@ -937,10 +955,9 @@
 #define DEFAULT_YJERK                 10.0
 #define DEFAULT_ZJERK                  0.4
 #define DEFAULT_EJERK                  5.0
-#endif
-#if ENABLED(MachineS5)
-#define DEFAULT_MAX_FEEDRATE          { 300, 300, 10, 25 }
-#define DEFAULT_MAX_ACCELERATION      { 1000, 500, 100, 25 }
+#elif ENABLED(MachineS5)
+#define DEFAULT_MAX_FEEDRATE          { 300, 300, 10, 50 }
+#define DEFAULT_MAX_ACCELERATION      { 1000, 500, 100, 500 }
 #define DEFAULT_ACCELERATION          300    // X, Y, Z and E acceleration for printing moves
 #define DEFAULT_RETRACT_ACCELERATION  1000    // E acceleration for retracts
 #define DEFAULT_TRAVEL_ACCELERATION   300    // X, Y, Z acceleration for travel (non printing) moves
@@ -950,6 +967,32 @@
 #define DEFAULT_EJERK                  5.0
 #endif
 
+/**
+ * S-Curve Acceleration
+ *
+ * This option eliminates vibration during printing by fitting a Bézier
+ * curve to move acceleration, producing much smoother direction changes.
+ *
+ * See https://github.com/synthetos/TinyG/wiki/Jerk-Controlled-Motion-Explained
+ */
+#if ENABLED(SmoothMotion)
+  #define S_CURVE_ACCELERATION
+  //
+// Use Junction Deviation instead of traditional Jerk Limiting
+//
+#define JUNCTION_DEVIATION
+#if ENABLED(JUNCTION_DEVIATION)
+  #define JUNCTION_DEVIATION_MM 0.08  // (mm) Distance from real junction edge
+#endif
+
+/**
+ * Adaptive Step Smoothing increases the resolution of multi-axis moves, particularly at step frequencies
+ * below 1kHz (for AVR) or 10kHz (for ARM), where aliasing between axes in multi-axis moves causes audible
+ * vibration and surface artifacts. The algorithm adapts to provide the best possible step smoothing at the
+ * lowest stepping frequencies.
+ */
+#define ADAPTIVE_STEP_SMOOTHING
+#endif
 
 /**
    Default Max Acceleration (change/s) change = mm/s
@@ -1046,7 +1089,8 @@
   #define BLTOUCH
 #endif
 #if ENABLED(BLTOUCH)
-  #define BLTOUCH_DELAY 375   // (ms) Enable and increase if needed
+  #define BLTOUCH_DELAY 500   // (ms) Enable and increase if needed
+  #define BLTOUCH_FORCE_5V_MODE // For BLTouch V3.0 force 5V only mode
 #endif
 
 /**
@@ -1109,8 +1153,8 @@
 */
 #if ENABLED(MachineCRX) && ENABLED(HotendStock)
   #if ENABLED(ABL_BLTOUCH)
-    #define X_PROBE_OFFSET_FROM_EXTRUDER -41  // X offset: -left  +right  [of the nozzle]
-    #define Y_PROBE_OFFSET_FROM_EXTRUDER -8  // Y offset: -front +behind [the nozzle]
+    #define X_PROBE_OFFSET_FROM_EXTRUDER -22  // X offset: -left  +right  [of the nozzle]
+    #define Y_PROBE_OFFSET_FROM_EXTRUDER -45  // Y offset: -front +behind [the nozzle]
     #define Z_PROBE_OFFSET_FROM_EXTRUDER 0   // Z offset: -below +above  [the nozzle]
   #endif
 
@@ -1127,8 +1171,8 @@
   #endif
 
   #if ENABLED(ABL_EZABL) || ENABLED(ABL_NCSW)
-    #define X_PROBE_OFFSET_FROM_EXTRUDER -27  // X offset: -left  +right  [of the nozzle]
-    #define Y_PROBE_OFFSET_FROM_EXTRUDER 0  // Y offset: -front +behind [the nozzle]
+    #define X_PROBE_OFFSET_FROM_EXTRUDER -50  // X offset: -left  +right  [of the nozzle]
+    #define Y_PROBE_OFFSET_FROM_EXTRUDER -9  // Y offset: -front +behind [the nozzle]
     #define Z_PROBE_OFFSET_FROM_EXTRUDER 0   // Z offset: -below +above  [the nozzle]
   #endif
 #else
@@ -1431,7 +1475,7 @@
  * For other boards you may need to define FIL_RUNOUT_PIN, FIL_RUNOUT2_PIN, etc.
  * By default the firmware assumes HIGH=FILAMENT PRESENT.
  */
-#if(DISABLED(MachineCR10Orig) &&(DISABLED(MachineCR20)|| ENABLED(AddonFilSensor)) && (DISABLED(MachineEnder4) || ENABLED(AddonFilSensor)) && (DISABLED(MachineCRX)|| ENABLED(AddonFilSensor)))
+#if ((DISABLED(MachineCR10Orig) && DISABLED(MachineCR20) && DISABLED(MachineEnder4) && DISABLED(MachineCRX)) || ENABLED(AddonFilSensor)) && DISABLED(CREALITY_DWIN)
   #define FILAMENT_RUNOUT_SENSOR
 #endif
 #if ENABLED(FILAMENT_RUNOUT_SENSOR)
@@ -1452,7 +1496,7 @@
 #else
   #define FILAMENT_RUNOUT_SCRIPT "M600"
 #endif
-#define FIL_RUNOUT_PIN 2
+  #define FIL_RUNOUT_PIN 2
 #endif
 
 //===========================================================================
@@ -1545,19 +1589,15 @@
 
 #endif
 #if ENABLED(MeshFast)
-#define GRID_MAX_POINTS_X 3
+  #define GRID_MAX_POINTS_X 3
 #elif (ENABLED(MeshStd) )
-  #if ENABLED(CREALITY_DWIN)
-    #define GRID_MAX_POINTS_X 4
-  #else
-    #define GRID_MAX_POINTS_X 5
-  #endif
+  #define GRID_MAX_POINTS_X 5
 #elif ENABLED( MeshFine)
-#define GRID_MAX_POINTS_X 8
+  #define GRID_MAX_POINTS_X 8
 #elif ENABLED(MeshExtreme)
-#define GRID_MAX_POINTS_X 15
+  #define GRID_MAX_POINTS_X 15
 #else
-GRID_MAX_POINTS_X 3
+  #define GRID_MAX_POINTS_X 3
 #endif
 
 #if ENABLED(AUTO_BED_LEVELING_LINEAR) || ENABLED(AUTO_BED_LEVELING_BILINEAR)
@@ -1571,6 +1611,7 @@ GRID_MAX_POINTS_X 3
 #define MIN_PROBE_EDGE 10
 
 // Set the boundaries for probing (where the probe can reach).
+
 #if( (X_PROBE_OFFSET_FROM_EXTRUDER + 15) > 0 )
 #define LEFT_PROBE_BED_POSITION (X_PROBE_OFFSET_FROM_EXTRUDER + 5)
 #else
@@ -1594,6 +1635,8 @@ GRID_MAX_POINTS_X 3
 #else
 #define BACK_PROBE_BED_POSITION (Y_BED_SIZE - 25)
 #endif
+
+
 
 // Probe along the Y axis, advancing X after each column
 //#define PROBE_Y_FIRST
@@ -1931,7 +1974,7 @@ GRID_MAX_POINTS_X 3
 #if(ENABLED(MachineEnder2))
 #define NOZZLE_PARK_POINT { (0), (0), 20 }
 #else
-#define NOZZLE_PARK_POINT { (10), (10), 20 }
+#define NOZZLE_PARK_POINT { (20), (20), 20 }
 #endif
 #define NOZZLE_PARK_XY_FEEDRATE 100   // X and Y axes feedrate in mm/s (also used for delta printers Z axis)
 #define NOZZLE_PARK_Z_FEEDRATE 5      // Z axis feedrate in mm/s (not used for delta printers)

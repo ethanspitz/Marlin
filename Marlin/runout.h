@@ -47,7 +47,11 @@ class FilamentRunoutSensor {
     FORCE_INLINE static void run() {
       if ((IS_SD_PRINTING || print_job_timer.isRunning()) && check() && !filament_ran_out) {
         filament_ran_out = true;
-        enqueue_and_echo_commands_P(PSTR(FILAMENT_RUNOUT_SCRIPT));
+        #if ENABLED(CREALITY_DWIN)
+          return;
+        #else
+          enqueue_and_echo_commands_P(PSTR(FILAMENT_RUNOUT_SCRIPT));
+        #endif
         planner.synchronize();
       }
     }

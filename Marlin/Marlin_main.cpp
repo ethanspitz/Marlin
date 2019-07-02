@@ -2139,6 +2139,11 @@ void clean_up_after_endstop_or_probe_move() {
     }
 
     bool set_bltouch_deployed(const bool deploy) {
+      #if ENABLED(BLTOUCH_FORCE_5V_MODE)
+        bltouch_command(BLTOUCH_5V_MODE);
+      #else
+        bltouch_command(BLTOUCH_OD_MODE);
+      #endif
       if (deploy && TEST_BLTOUCH()) {      // If BL-Touch says it's triggered
         bltouch_command(BLTOUCH_RESET);    //  try to reset it.
         bltouch_command(BLTOUCH_DEPLOY);   // Also needs to deploy and stow to
@@ -2154,7 +2159,17 @@ void clean_up_after_endstop_or_probe_move() {
         }
       }
 
+      #if ENABLED(BLTOUCH_FORCE_5V_MODE)
+        bltouch_command(BLTOUCH_5V_MODE);
+      #else
+        bltouch_command(BLTOUCH_OD_MODE);
+      #endif
+
+      if(deploy)
+        bltouch_command(BLTOUCH_SW_MODE);
+        
       bltouch_command(deploy ? BLTOUCH_DEPLOY : BLTOUCH_STOW);
+      
 
       #if ENABLED(DEBUG_LEVELING_FEATURE)
         if (DEBUGGING(LEVELING)) {
@@ -2539,6 +2554,10 @@ void clean_up_after_endstop_or_probe_move() {
       LCD_MESSAGEPGM(MSG_ERR_PROBING_FAILED);
       SERIAL_ERROR_START();
       SERIAL_ERRORLNPGM(MSG_ERR_PROBING_FAILED);
+      #if ENABLED(CREALITY_DWIN) && ENABLED(TM3DTouchscreenUpdates)
+        rtscheck.RTS_SndData(ExchangePageBase + 16, ExchangepageAddr); //Goto screen 1
+        kill(PSTR(MSG_ERR_PROBING_FAILED));
+      #endif
     }
 
     #if ENABLED(DEBUG_LEVELING_FEATURE)
@@ -3544,9 +3563,9 @@ inline void gcode_G0_G1(
       }
       else if(waitway == 2)
         waitway = 0;
-      
-      if(FilementStatus[1] == 1)
-        FilementStatus[1] = 2;	
+
+        if ((card.sdprinting || print_job_timer.isRunning) && FilementStatus[1] != 0)
+          FilementStatus[1] = 2;
     #endif
   }
 }
@@ -4580,15 +4599,16 @@ inline void gcode_G28(const bool always_home_all) {
   #if ENABLED(CREALITY_DWIN)
    if(waitway > 1)
   {
-	if(AutohomeKey)
-	{
-		InforShowStatus = AutohomeKey = false;
-		if(LanguageRecbuf != 0)
-			rtscheck.RTS_SndData(ExchangePageBase + 29 + AxisPagenum, ExchangepageAddr);
-		else
-			rtscheck.RTS_SndData(ExchangePageBase + 71 + AxisPagenum, ExchangepageAddr);
-	}
-	waitway = 0;
+    if(AutohomeKey)
+    {
+      InforShowStatus = AutohomeKey = false;
+      if(LanguageRecbuf != 0)
+        rtscheck.RTS_SndData(ExchangePageBase + 29 + AxisPagenum, ExchangepageAddr);
+      else
+        rtscheck.RTS_SndData(ExchangePageBase + 71 + AxisPagenum, ExchangepageAddr);
+    }
+    if(waitway!=3)
+      waitway = 0;
 
    }
 	rtscheck.RTS_SndData(10*current_position[X_AXIS], DisplayXaxis);
@@ -5293,9 +5313,9 @@ void home_all_axes() { gcode_G28(true); }
 
           z_values[xCount][yCount] = measured_z + zoffset;
           #if ENABLED(CREALITY_DWIN)
-	          if((showcount++) < 16 && waitway == 3)
+	          if((showcount++) < (GRID_MAX_POINTS_X * GRID_MAX_POINTS_X))
 	      	  {
-			        rtscheck.RTS_SndData(z_values[xCount][yCount] *10000, AutolevelVal + (showcount-1)*2);
+			        rtscheck.RTS_SndData(z_values[xCount][yCount] *1000, AutolevelVal + (showcount-1)*2);
 			        rtscheck.RTS_SndData(showcount,AutolevelIcon);
 		        }
           #endif
@@ -5476,9 +5496,9 @@ void home_all_axes() { gcode_G28(true); }
 
               z_values[xCount][yCount] = measured_z + zoffset;
               #if ENABLED(CREALITY_DWIN)
-                if((showcount++) < 16 && waitway == 3)
+                if((showcount++) < (GRID_MAX_POINTS_X * GRID_MAX_POINTS_X))
                 {
-                  rtscheck.RTS_SndData(z_values[xCount][yCount] *10000, AutolevelVal + (showcount-1)*2);
+                  rtscheck.RTS_SndData(z_values[xCount][yCount] *1000, AutolevelVal + (showcount-1)*2);
                   rtscheck.RTS_SndData(showcount,AutolevelIcon);
                 }
               #endif
@@ -5557,7 +5577,7 @@ void home_all_axes() { gcode_G28(true); }
         if (!dryrun) extrapolate_unprobed_bed_level();
         print_bilinear_leveling_grid();
         #if ENABLED(CREALITY_DWIN)
-          if(waitway == 3)
+          if(waitway == 3 || (!print_job_timer.isRunning && !card.sdprinting))
           {
             waitway = 0;
             if(LanguageRecbuf != 0)
@@ -8395,7 +8415,7 @@ inline void gcode_M42() {
 
 #endif // G26_MESH_VALIDATION
 
-#if ENABLED(ULTRA_LCD) && ENABLED(LCD_SET_PROGRESS_MANUALLY)
+#if (ENABLED(ULTRA_LCD) || ENABLED(CREALITY_DWIN)) && ENABLED(LCD_SET_PROGRESS_MANUALLY)
   /**
    * M73: Set percentage complete (for display on LCD)
    *
@@ -8776,8 +8796,9 @@ inline void gcode_M109() {
 				}
 				CardCheckStatus[0] = 1;	// open the key of  checking card in  printing
 				FilementStatus[1] = 1; 	//begin to check filement status.
+	//SERIAL_ECHOPAIR("\n ***M109 Status[1] =",FilementStatus[1]);
 			}
-			
+				//SERIAL_ECHOPAIR("\n ***PrinterStatusKey[1] =",PrinterStatusKey[1]);
 			PreheatStatus[1] = PreheatStatus[0] = false;
 		}
 		else
@@ -8963,8 +8984,11 @@ inline void gcode_M109() {
 
           CardCheckStatus[0] = 1;	// open the key of  checking card in  printing
           FilementStatus[1] = 1; 	//begin to check filement status.
+          
+	//SERIAL_ECHOPAIR("\n ***M190 Status[1] =",FilementStatus[1]);
         }
         
+	//SERIAL_ECHOPAIR("\n ***PrinterStatusKey[1] =",PrinterStatusKey[1]);
         PreheatStatus[1] = PreheatStatus[0] = false;
       }
       else
@@ -9240,6 +9264,37 @@ inline void gcode_M18_M84() {
       if (ubl.lcd_map_control) ubl.lcd_map_control = defer_return_to_status = false;
     #endif
   }
+  #if ENABLED(CREALITY_DWIN)
+    rtscheck.RTS_SndData(11, FilenameIcon); 
+	
+    delay(1000);
+    rtscheck.RTS_SndData(0,PrintscheduleIcon);
+    rtscheck.RTS_SndData(0,PrintscheduleIcon+1);
+    rtscheck.RTS_SndData(0,Percentage);
+    delay(2);
+    for(int j = 0;j < 10;j++)	
+    {
+      rtscheck.RTS_SndData(0,Printfilename+j); //clean screen.
+      rtscheck.RTS_SndData(0,Choosefilename+j); //clean filename
+    }
+    for(int j = 0;j < 8;j++)
+      rtscheck.RTS_SndData(0,FilenameCount+j);
+    TPShowStatus = false;
+    SERIAL_ECHO("\n SD Stop Setting Screen ");
+    if(LanguageRecbuf != 0)
+    {
+      rtscheck.RTS_SndData(0,IconPrintstatus);	// 0 for ready 
+      delay(2);
+      rtscheck.RTS_SndData(ExchangePageBase + 1, ExchangepageAddr); //exchange to 1 page
+    }
+    else
+    {
+      rtscheck.RTS_SndData(0+CEIconGrap,IconPrintstatus);	// 0 for ready 
+      delay(2);
+      rtscheck.RTS_SndData(ExchangePageBase + 45, ExchangepageAddr); //exchange to 45 page
+    }
+    waitway = 0;
+  #endif
 }
 
 /**
@@ -13071,7 +13126,7 @@ void process_parsed_command() {
         case 49: gcode_M49(); break;                              // M49: Toggle the G26 Debug Flag
       #endif
 
-      #if ENABLED(ULTRA_LCD) && ENABLED(LCD_SET_PROGRESS_MANUALLY)
+      #if (ENABLED(ULTRA_LCD) || ENABLED(CREALITY_DWIN)) && ENABLED(LCD_SET_PROGRESS_MANUALLY)
         case 73: gcode_M73(); break;                              // M73: Set Print Progress %
       #endif
       case 75: gcode_M75(); break;                                // M75: Start Print Job Timer
@@ -15241,7 +15296,6 @@ void idle(
 void kill(const char* lcd_msg) {
   SERIAL_ERROR_START();
   SERIAL_ERRORLNPGM(MSG_ERR_KILLED);
-
   thermalManager.disable_all_heaters();
   disable_all_steppers();
 
@@ -15515,6 +15569,12 @@ void setup() {
   #endif
 
   #if ENABLED(BLTOUCH)
+    #if ENABLED(BLTOUCH_FORCE_5V_MODE)
+      bltouch_command(BLTOUCH_5V_MODE);
+    #else
+      bltouch_command(BLTOUCH_OD_MODE);
+    #endif
+
     // Make sure any BLTouch error condition is cleared
     bltouch_command(BLTOUCH_RESET);
     set_bltouch_deployed(false);
